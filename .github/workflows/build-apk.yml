@@ -1,0 +1,31 @@
+name: Build APK
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Unzip project
+      run: |
+        unzip GlobalSOS_Complete.zip
+        cp -r GlobalSOS_Final/* .
+        cp -r GlobalSOS_Final/.github . 2>/dev/null || true
+        cp GlobalSOS_Final/.gitignore . 2>/dev/null || true
+    - uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - uses: android-actions/setup-android@v3
+    - uses: gradle/actions/setup-gradle@v4
+    - name: Build
+      run: |
+        gradle wrapper --gradle-version 8.6
+        chmod +x gradlew
+        ./gradlew assembleDebug
+    - uses: actions/upload-artifact@v4
+      with:
+        name: GlobalSOS-APK
+        path: app/build/outputs/apk/debug/app-debug.apk
